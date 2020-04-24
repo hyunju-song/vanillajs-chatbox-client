@@ -16,7 +16,8 @@
   "scripts": {
     "test": "mocha __test__/test.mocha.js",
     "precommit": "lint-staged",
-    "lint": "eslint client/scripts/app.js"
+    "lint": "eslint client/scripts/app.js",
+    "submit": "node .travis/submit.js"
   },
   "lint-staged": {
     "linters": {
