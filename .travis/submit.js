@@ -6,31 +6,35 @@ if (TRAVIS_PULL_REQUEST_SLUG === '\n') {
   throw new Error('github username is missing');
 }
 
-exec('mocha __test__/test.mocha.js --reporter json', (err, json, stderr) => {
-  const result = JSON.parse(json);
-  const username = TRAVIS_PULL_REQUEST_SLUG.split('/')[0];
+exec(
+  'node ../node_modules/.bin/mocha __test__/test.mocha.js --reporter json',
+  (err, json, stderr) => {
+    console.log(err, json);
+    const result = JSON.parse(json);
+    const username = TRAVIS_PULL_REQUEST_SLUG.split('/')[0];
 
-  const options = {
-    hostname: URCLASS_URL,
-    path: `/production/submit/sprint`,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  };
+    const options = {
+      hostname: URCLASS_URL,
+      path: `/production/submit/sprint`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
 
-  console.log(JSON.stringify(options));
-  console.log(result);
+    console.log(JSON.stringify(options));
+    console.log(result);
 
-  const body = {
-    assessment_id: ASSESSMENT_ID,
-    githubUsername: username,
-    type: 'mocha',
-    result: result,
-  };
+    const body = {
+      assessment_id: ASSESSMENT_ID,
+      githubUsername: username,
+      type: 'mocha',
+      result: result,
+    };
 
-  makeRequest(options, body);
-});
+    makeRequest(options, body);
+  }
+);
 
 function makeRequest(options, body) {
   const req = https.request(options, (res) => {
