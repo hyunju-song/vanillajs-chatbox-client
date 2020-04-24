@@ -7,7 +7,7 @@ if (TRAVIS_PULL_REQUEST_SLUG === '\n') {
 }
 
 exec(
-  'node ../node_modules/.bin/mocha __test__/test.mocha.js --reporter json',
+  'node ./node_modules/.bin/mocha __test__/test.mocha.js --reporter json',
   (err, json, stderr) => {
     console.log(err, json);
     const result = JSON.parse(json);
