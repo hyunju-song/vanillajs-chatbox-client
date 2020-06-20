@@ -88,3 +88,21 @@ form input[type="text"] {
   color: #fff;
   background-color: #0090da;
 }
+
+.select{
+  display: inline;
+}
+
+.message-box {
+  margin-top: 10px;
+}
+
+#message {
+  width: 50%;
+  height: 30px; 
+}
+
+#submit {
+  position: absolute;
+  margin: 10px;
+}
