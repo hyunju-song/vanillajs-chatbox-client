@@ -37,9 +37,7 @@ let roomName = document.querySelector(".roomname").value; //수정
 let submit = document.querySelector("#submit");
 
 var postMessage = {
-  username: 'hyunju',
-  text: message,
-  roomname: roomName
+  username: 'hyunju'
 };
 
 submit.onclick = function(){
