@@ -2,18 +2,43 @@
 const app = {
   server: 'http://52.78.206.149:3000/messages',
   init : function(){
-  },
-  fetch : function(){
     fetch(this.server)
     .then((response) => response.json())
+    .then(data => data.filter((input)=>{
+      if(input.roomname === 'lobby'){
+        return true;
+      }
+    }))
+    .then(con => {
+      for(let i=0;i<con.length;i++){
+        this.renderMessage(con[i]);
+      }
+    });
   },
-  send : function(message){    
-  fetch(this.server,{      
-    method: 'POST',      
-    body: JSON.stringify(message),      
-    headers: {"Content-Type": "application/json",}    
-    })    
-    .then(response=>response.json())  
+  fetch : function(roomname){
+    fetch(this.server)
+    .then((response) => response.json())
+    .then(data => data.filter((input)=>{
+      if(input.roomname === roomname){
+        return true;
+      }
+    }))
+    .then(con => {
+      for(let i=0;i<con.length;i++){
+        this.renderMessage(con[i]);
+      }
+    });
+  },
+  send : function(message){
+    this.clearMessages();
+    fetch(this.server,{
+      method: 'POST',
+      body: JSON.stringify(message),
+      headers: {
+        "Content-Type": "application/json",
+      }
+    })
+    this.fetch(message.roomname);
   },
   clearMessages : function(){
     let chats = document.querySelector("#chats")
@@ -21,10 +46,21 @@ const app = {
       chats.firstChild.remove();
     }
   },
-  renderMessage : function(){
+  renderMessage : function(data){
     let chats = document.querySelector("#chats")
     let newChild = document.createElement('p')
-    chats.appendChild(newChild)
+    let username = document.createElement('span');
+    username.className = 'username';
+    username.innerHTML = data.username;
+    let message = document.createElement('span');
+    message.className = 'text';
+    message.innerHTML = data.text;
+    newChild.appendChild(username);
+    newChild.appendChild(document.createElement('br'));
+    newChild.appendChild(document.createElement('br'));
+    newChild.appendChild(message);
+    newChild.appendChild(document.createElement('hr'));
+    chats.appendChild(newChild);
   }
 };
 
@@ -32,31 +68,23 @@ const app = {
 //서버에서 해당 메시지를 get으로 부른후에,
 //DOM 조작해서 화면에 표시
 
-let message = document.querySelector("#message").value;
-let roomName = document.querySelector(".roomname").value; //수정
+let message = document.querySelector("#message");
+let roomName = document.querySelector(".roomname") //수정
 let submit = document.querySelector("#submit");
 
-var postMessage = {
+app.init();
+
+let postMessage = {
   username: 'hyunju',
-  text: message,
-  roomname: roomName
+  text: 'dasdf',
+  roomname: 'asdf'
 };
 
 submit.onclick = function(){
-  postMessage.text = message;
-  postMessage.roomname = roomName;
+  postMessage.text = message.value;
+  postMessage.roomname = roomName.value;
   app.send(postMessage);
 }
-  // .then((response) => {
-  //   return response.json()
-  // }).then(json => {
-  //   console.log(json);
-  // })
-
-
-// postMessage.text = message;
-// postMessage.roomname = roomName;
-
 
 
 
