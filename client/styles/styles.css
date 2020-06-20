@@ -106,3 +106,16 @@ form input[type="text"] {
   position: absolute;
   margin: 10px;
 }
+
+#chats p{
+  background-color: #e3e3e3;
+  padding: 5px;
+}
+
+#chats p span:first-child{
+  font-weight: 800;
+}
+
+#chats p span{
+  display: block;
+}
