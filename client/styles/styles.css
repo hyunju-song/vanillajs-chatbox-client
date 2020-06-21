@@ -99,12 +99,12 @@ form input[type="text"] {
 
 #message {
   width: 50%;
-  height: 30px; 
+  /* height: 30px;  */
 }
 
 #submit {
-  position: absolute;
-  margin: 10px;
+  /* position: absolute; */
+  margin-top: 10px;
 }
 
 #chats p{
@@ -118,4 +118,9 @@ form input[type="text"] {
 
 #chats p span{
   display: block;
+}
+
+.user,
+.room {
+  margin-bottom: 10px;
 }

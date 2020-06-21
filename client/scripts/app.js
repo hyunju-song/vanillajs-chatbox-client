@@ -2,73 +2,57 @@
 
 let roomNameOption = [];
 let message = document.querySelector("#message");
-// let roomName = document.querySelector("select") //수정
+let user = document.querySelector("#input-username");
+let room = document.querySelector("#input-room"); 
 let submit = document.querySelector("#submit");
-
 
 const app = {
   server: 'http://52.78.206.149:3000/messages',
-  init : function(){
-    fetch(this.server)
+  init : () => {
+    fetch(app.server)
     .then((response) => response.json())
-    .then(con => {
-      for(let i=0;i<con.length;i++){
-        this.renderMessage(con[i]);
-        if(!roomNameOption.includes(con[i].roomname)){
-          roomNameOption.push(con[i].roomname);
-          this.addRoomName(con[i].roomname);
+    .then(res => {
+      for(let i=0;i<res.length;i++){
+        app.renderMessage(res[i]);
+        if(!roomNameOption.includes(res[i].roomname)){
+          roomNameOption.push(res[i].roomname);
+          app.addRoomName(res[i].roomname);
         }
       }
-      return con;
+      return res;
     })
-    .then(data => data.filter((input)=>{
-      if(input.roomname === roomNameOption[document.querySelector('select').selectedIndex]){
-        return true;
-    }
-  }))
-    .then(con => {
-      for(let i=0;i<con.length;i++){
-        this.renderMessage(con[i]);
-      }
-    });
   },
-  fetch : function(roomname){
-    fetch(this.server)
-    .then((response) => response.json())
-    .then(con => {
-      for(let i=0;i<con.length;i++){
-        this.renderMessage(con[i]);        
-        if(!roomNameOption.includes(con[i].roomname)){
-          roomNameOption.push(con[i].roomname);
-          this.addRoomName(con[i].roomname);
+  fetch : ()=>{
+    window
+      .fetch(app.server)
+      .then(response => response.json())
+      .then((data) => data.filter((elem)=>{
+        if(elem.roomname === roomNameOption[document.querySelector('select').selectedIndex]){
+          return true;
         }
-      }
-      return con;
-    })
-    .then(data => data.filter((input)=>{
-      if(input.roomname === roomname){
-        return true;
-      }
-    }))
-    .then(con => {
-      this.clearMessages();
-      for(let i=0;i<con.length;i++){
-        this.renderMessage(con[i]);
-      }
-    });
-    
+      }))
+      .then(con => {
+        app.clearMessages();
+        for(let i=0;i<con.length;i++){
+          app.renderMessage(con[i]);
+        }
+      });
   },
-  send : function(CSR){
-    fetch(this.server,{
-      method: 'POST',
-      body: JSON.stringify(CSR),
-      headers: {
-        "Content-Type": "application/json",
-      }
-    })
-    this.clearMessages();
-    this.fetch(CSR.roomname);
-    document.querySelector('input').value = "";
+  send : (postMessage, callback) => {
+    window
+      .fetch(app.server,{
+        method: 'POST',
+        body: JSON.stringify(postMessage),
+        headers: {
+          "Content-Type": "application/json",
+        }
+      })
+      .then(res => res.json())
+      .then(callback);
+    app.clearMessages();
+    message.value = "";
+    user.value = "";
+    room.value = "";
   },
   clearMessages : function(){
     let chats = document.querySelector("#chats")
@@ -85,46 +69,43 @@ const app = {
     let creatMessage = document.createElement('span');
     creatMessage.className = 'text';
     creatMessage.innerHTML = data.text;
+    let date = document.createElement('span');
+    date.className = 'date';
+    date.innerHTML = data.date;
     newChild.appendChild(username);
-    // newChild.appendChild(document.createElement('br'));
-    // newChild.appendChild(document.createElement('br'));
     newChild.appendChild(creatMessage);
-    // newChild.appendChild(document.createElement('hr'));
+    newChild.appendChild(date);
     chats.appendChild(newChild);
   },
   addRoomName : function(data){
     let select = document.querySelector('select');
     let option = document.createElement('option');
-    option.className = 'roomname';
-    option.id = data;
+    option.className = 'roomname-option';
     option.value = data;
     option.innerHTML = data;
     option.type = 'button';
-    
-    select.onchange = function(){
-      postMessage.roomname = roomNameOption[document.querySelector('select').selectedIndex];
-      app.fetch(roomNameOption[document.querySelector('select').selectedIndex]);
-    }
-
-    // select.addEventListener('change',this.fetch(roomNameOption[document.querySelector('select').selectedIndex]))
-
     select.appendChild(option)
-  }
+    select.onchange = function(){
+      app.fetch();
+    }
+   }
 };
 
-//입력한 메세지를 post로 서버에 저장. 
-//서버에서 해당 메시지를 get으로 부른후에,
-//DOM 조작해서 화면에 표시
-
+app.init();
 
 var postMessage = {
-  username: 'hyunju'
 };
 
-submit.onclick = function(){
+submit.onclick = (e) => {
+  postMessage.username = user.value;
   postMessage.text = message.value;
-  postMessage.roomname = roomNameOption[document.querySelector('select').selectedIndex];
-  app.send(postMessage);
+  if(room.value){
+    postMessage.roomname = room.value;
+  } else {
+    postMessage.roomname = roomNameOption[document.querySelector('select').selectedIndex];
+  }
+  e.preventDefault();
+  app.send(postMessage , ()=>{app.fetch()});
 }
 
 
