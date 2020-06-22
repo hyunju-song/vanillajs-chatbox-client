@@ -130,15 +130,19 @@ const app = {
 submit.addEventListener('click', app.handleSubmit);
 app.init();
 
-//autofetch 코드가 잘못된건지 eslint 에러에 자꾸 걸려서 코드를 비활성화 합니다
-// function autoFetch(){
-//   app.fetch();
-//   if(true){
-//     setTimeout(autoFetch, 5000);
-//   }
-// }
+let database;
+function autoFetch(){
+  fetch(app.server)
+  .then(res => res.json())
+  .then(json => {
+    if(json.length !== database.length){
+      app.fetch();
+      setTimeout(autoFetch, 5000);
+    }
+  })
+}
 
-// autoFetch();
+autoFetch();
 
 
 
