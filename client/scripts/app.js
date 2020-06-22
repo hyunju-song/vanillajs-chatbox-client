@@ -130,22 +130,16 @@ const app = {
 submit.addEventListener('click', app.handleSubmit);
 app.init();
 
-let database;
+/*autofetch 부분
 function autoFetch(){
-  fetch(app.server)
-  .then(res => res.json())
-  .then(json => {
-    if(json.length !== database.length){
-      app.fetch();
-      setTimeout(autoFetch, 5000);
-    }
-  })
+  app.fetch();
+  if(true){
+    setTimeout(autoFetch, 5000);
+  }
 }
 
 autoFetch();
-
-
-
+*/
 
 
 
