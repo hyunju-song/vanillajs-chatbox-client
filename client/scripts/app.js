@@ -1,7 +1,8 @@
 // eslint-disable-next-line
 
 let roomNameOption = [];
-let message = document.querySelector("#message");
+let postMessage = {};
+let message = document.querySelector("#message-input");
 let user = document.querySelector("#input-username");
 let room = document.querySelector("#input-room"); 
 let submit = document.querySelector("#submit");
@@ -11,23 +12,18 @@ const app = {
   init : () => {
     fetch(app.server)
     .then((response) => response.json())
-    .then(res => {
-      for(let i=0;i<res.length;i++){
-        app.renderMessage(res[i]);
-        if(!roomNameOption.includes(res[i].roomname)){
-          roomNameOption.push(res[i].roomname);
-          app.addRoomName(res[i].roomname);
-        }
-      }
-      return res;
+    .then(json => {
+      app.roomnameIsNew(json);
     })
   },
   fetch : ()=>{
     window
       .fetch(app.server)
       .then(response => response.json())
-      .then((data) => data.filter((elem)=>{
-        if(elem.roomname === roomNameOption[document.querySelector('select').selectedIndex]){
+      .then(data => 
+        data.filter((elem)=>{
+        if(elem.roomname === roomNameOption[document
+          .querySelector('select').selectedIndex]){
           return true;
         }
       }))
@@ -49,64 +45,101 @@ const app = {
       })
       .then(res => res.json())
       .then(callback);
-    app.clearMessages();
+  },
+  clearMessages : function(){
+    document.querySelector('#chats').innerHTML = '';
+  },
+  clearForm : function(){
     message.value = "";
     user.value = "";
     room.value = "";
   },
-  clearMessages : function(){
-    let chats = document.querySelector("#chats")
-    while(chats.firstChild){
-      chats.firstChild.remove();
-    }
-  },
-  renderMessage : function(data){
-    let chats = document.querySelector("#chats")
-    let newChild = document.createElement('p')
-    let username = document.createElement('span');
-    username.className = 'username';
-    username.innerHTML = data.username;
-    let creatMessage = document.createElement('span');
-    creatMessage.className = 'text';
-    creatMessage.innerHTML = data.text;
-    let date = document.createElement('span');
-    date.className = 'date';
-    date.innerHTML = data.date;
-    newChild.appendChild(username);
-    newChild.appendChild(creatMessage);
-    newChild.appendChild(date);
-    chats.appendChild(newChild);
+  renderMessage : function({username,text,date,roomname}){
+    ///</ , />/ 이건 정규표현식의 일종으로 태그로 인식되는 < 나 > 가 입력되는 경우에 
+    //&lt; 나 &gt;로 변환해준다는 말
+    const tmpl = `<div class="chat">
+      <div class="username"> username: ${username
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+      }</div>
+      <div> text: ${text
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+      }</div>
+      <div> date: ${date}</div>
+      <div>roomname: ${roomname
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+      }</div>
+    </div>`;
+
+    document.querySelector('#chats').innerHTML =
+      tmpl + document.querySelector('#chats').innerHTML;
   },
   addRoomName : function(data){
+    const optionTmpl = `<select>
+      <option class="roomname-option"
+      value = ${data}
+      type = "button"> ${data} 
+      </option>
+      </select>`
     let select = document.querySelector('select');
-    let option = document.createElement('option');
-    option.className = 'roomname-option';
-    option.value = data;
-    option.innerHTML = data;
-    option.type = 'button';
-    select.appendChild(option)
+    select.innerHTML = select.innerHTML + optionTmpl;
     select.onchange = function(){
       app.fetch();
     }
-   }
+   },
+   roomnameIsNew : res => {
+     res.forEach((elem) =>{
+       app.renderMessage(elem);
+       if(!roomNameOption.includes(elem.roomname)){
+         roomNameOption.push(elem.roomname);
+         app.addRoomName(elem.roomname , ()=>{app.fetch()});
+       }
+     })
+    return;
+   },
+  handleSubmit: e => {
+    e.preventDefault();
+    app.clearMessages();
+    postMessage.username = user.value;
+    postMessage.text = message.value;
+    if(room.value){
+      postMessage.roomname = room.value;
+    } else {
+      postMessage.roomname = roomNameOption[document
+        .querySelector('select').selectedIndex];
+    }
+    if(!roomNameOption.includes(room.value)){
+      roomNameOption.push(room.value);
+      app.addRoomName(room.value , 
+        ()=>{
+          app.fetch();
+          app.clearForm();
+        });
+    }
+    app.send(postMessage ,
+      ()=>{
+        app.fetch();
+        app.clearForm();
+      }
+    );
+  }
 };
 
+submit.addEventListener('click', app.handleSubmit);
 app.init();
 
-var postMessage = {
-};
+//autofetch 코드가 잘못된건지 eslint 에러에 자꾸 걸려서 코드를 비활성화 합니다
+// function autoFetch(){
+//   app.fetch();
+//   if(true){
+//     setTimeout(autoFetch, 5000);
+//   }
+// }
 
-submit.onclick = (e) => {
-  postMessage.username = user.value;
-  postMessage.text = message.value;
-  if(room.value){
-    postMessage.roomname = room.value;
-  } else {
-    postMessage.roomname = roomNameOption[document.querySelector('select').selectedIndex];
-  }
-  e.preventDefault();
-  app.send(postMessage , ()=>{app.fetch()});
-}
+// autoFetch();
+
 
 
 
