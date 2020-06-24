@@ -107,18 +107,19 @@ form input[type="text"] {
   margin-top: 10px;
 }
 
-#chats p{
+#chats div.dataId{
   background-color: #e3e3e3;
   padding: 5px;
+  margin : 10px 0px;
 }
 
-#chats p span:first-child{
+#chats div p:first-child{
   font-weight: 800;
 }
 
-#chats p span{
+/* #chats div div{
   display: block;
-}
+} */
 
 .user,
 .room {

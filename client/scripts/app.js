@@ -2,6 +2,7 @@
 
 let roomNameOption = [];
 let postMessage = {};
+let dataIdArr = [];
 let message = document.querySelector("#message-input");
 let user = document.querySelector("#input-username");
 let room = document.querySelector("#input-room"); 
@@ -54,27 +55,30 @@ const app = {
     user.value = "";
     room.value = "";
   },
-  renderMessage : function({username,text,date,roomname}){
+  renderMessage : function({id, username,text,date,roomname}){
     ///</ , />/ 이건 정규표현식의 일종으로 태그로 인식되는 < 나 > 가 입력되는 경우에 
     //&lt; 나 &gt;로 변환해준다는 말
-    const tmpl = `<div class="chat">
-      <div class="username"> username: ${username
+    const tmpl = `<div class="dataId" data-id="${id}">
+      <p class="username"> username: ${username
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-      }</div>
-      <div> text: ${text
+      }</p>
+      <p> text: ${text
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-      }</div>
-      <div> date: ${date}</div>
-      <div>roomname: ${roomname
+      }</p>
+      <p> date: ${date}</p>
+      <p>roomname: ${roomname
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-      }</div>
+      }</p>
     </div>`;
 
     document.querySelector('#chats').innerHTML =
       tmpl + document.querySelector('#chats').innerHTML;
+    
+    let dataid = document.querySelector('#chats').firstChild.dataset.id;
+    dataIdArr.push(dataid);
   },
   addRoomName : function(data){
     const optionTmpl = `<select>
@@ -130,16 +134,26 @@ const app = {
 submit.addEventListener('click', app.handleSubmit);
 app.init();
 
-/*autofetch 부분
-function autoFetch(){
-  app.fetch();
-  if(true){
-    setTimeout(autoFetch, 5000);
-  }
-}
+// let data = document.querySelector('#chats').firstChild
+// console.log(document.querySelector('#chats').firstChild)
+// let dataId = data.dataset.id;
 
+//autofetch 부분
+function autoFetch(){
+  fetch(app.server)
+  .then(res => res.json())
+  .then(json => {
+    let jsonId = json[json.length-1]['id'];
+    let dataLastId = dataIdArr[-1];
+    if(jsonId === dataLastId){
+      return;
+    }
+    app.fetch();
+    setTimeout(autoFetch, 5000);
+  })
+}
 autoFetch();
-*/
+
 
 
 
