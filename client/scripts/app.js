@@ -3,13 +3,33 @@
 let roomNameOption = [];
 let postMessage = {};
 let dataIdArr = [];
+let id = 0;
+//지금시간 구하기
+function newTime(){
+  let date = new Date();
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let seconds = date.getSeconds();
+  let nowTime = `${hours < 10 ? `0${hours}` : hours}:${
+      minutes < 10 ? `0${minutes}` : minutes}:${
+      seconds < 10 ? `0${seconds}` : seconds}`;
+  return nowTime;
+}
+//지금의 날짜와 시간 구하기
+function getToday(){
+  let date = new Date();
+  let nowDate = date.getFullYear()+"-"+(
+      "0"+(date.getMonth()+1)).slice(-2)+"-"+(
+      "0"+date.getDate()).slice(-2) + " " + newTime();
+  return nowDate;
+}
 let message = document.querySelector("#message-input");
 let user = document.querySelector("#input-username");
 let room = document.querySelector("#input-room"); 
 let submit = document.querySelector("#submit");
 
 const app = {
-  server: 'http://52.78.206.149:3000/messages',
+  server: 'http://localhost:3000/',
   init : () => {
     fetch(app.server)
     .then((response) => response.json())
@@ -55,10 +75,10 @@ const app = {
     user.value = "";
     room.value = "";
   },
-  renderMessage : function({id, username,text,date,roomname}){
+  renderMessage : function({username, text, roomname, date, id}){
     ///</ , />/ 이건 정규표현식의 일종으로 태그로 인식되는 < 나 > 가 입력되는 경우에 
     //&lt; 나 &gt;로 변환해준다는 말
-    const tmpl = `<div class="dataId" data-id="${id}">
+    let tmpl = `<div class="dataId" data-id="${id}">
       <p class="username"> username: ${username
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -106,14 +126,17 @@ const app = {
   handleSubmit: e => {
     e.preventDefault();
     app.clearMessages();
-    postMessage.username = user.value;
-    postMessage.text = message.value;
+    postMessage.username = encodeURI(encodeURIComponent(user.value));
+    postMessage.text = encodeURI(encodeURIComponent(message.value));
     if(room.value){
-      postMessage.roomname = room.value;
+      postMessage.roomname = encodeURI(encodeURIComponent(room.value));
     } else {
-      postMessage.roomname = roomNameOption[document
-        .querySelector('select').selectedIndex];
+      postMessage.roomname = encodeURI(encodeURIComponent(roomNameOption[document
+        .querySelector('select').selectedIndex]));
     }
+    postMessage.date = getToday();
+    postMessage.id = id;
+    id ++;
     if(!roomNameOption.includes(room.value)){
       roomNameOption.push(room.value);
       app.addRoomName(room.value , 
@@ -139,20 +162,21 @@ app.init();
 // let dataId = data.dataset.id;
 
 //autofetch 부분
-function autoFetch(){
-  fetch(app.server)
-  .then(res => res.json())
-  .then(json => {
-    let jsonId = json[json.length-1]['id'];
-    let dataLastId = dataIdArr[-1];
-    if(jsonId === dataLastId){
-      return;
-    }
-    app.fetch();
-    setTimeout(autoFetch, 5000);
-  })
-}
-autoFetch();
+// function autoFetch(){
+//   fetch(app.server)
+//   .then(res => res.json())
+//   .then(json => {
+//     app.fetch();
+//     let jsonId = json[json.length-1]['id'];
+//     let dataLastId = dataIdArr[-1];
+//     if(jsonId === dataLastId){
+//       return;
+//     }
+//     setTimeout(autoFetch, 5000);
+//   })
+// }
+
+// autoFetch();
 
 
 
