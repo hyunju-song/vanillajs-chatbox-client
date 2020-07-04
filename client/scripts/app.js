@@ -29,7 +29,7 @@ let room = document.querySelector("#input-room");
 let submit = document.querySelector("#submit");
 
 const app = {
-  server: 'http://localhost:3000/',
+  server: 'http://localhost:3000/messages',
   init : () => {
     fetch(app.server)
     .then((response) => response.json())
@@ -162,17 +162,22 @@ app.init();
 // let dataId = data.dataset.id;
 
 //autofetch 부분
+let idHas = false;
+
 function autoFetch(){
   fetch(app.server)
   .then(res => res.json())
   .then(json => {
     app.fetch();
-    let jsonId = json[json.length-1]['id'];
-    let dataLastId = dataIdArr[-1];
-    if(jsonId === dataLastId){
-      return;
+    if(idHas){
+      let jsonId = json[json.length-1]['id'];
+      let dataLastId = dataIdArr[-1];
+      if(jsonId === dataLastId){
+        return;
+      }
+      setTimeout(autoFetch, 5000);
+      idHas = true;
     }
-    setTimeout(autoFetch, 5000);
   })
 }
 
